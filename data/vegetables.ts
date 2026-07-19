@@ -54,14 +54,14 @@ export const vegetables = {
     ],
     price: 800,
   },
-  lajiao: {
+  niujiajiao: {
     name: '牛角椒',
     description: '辣度适中的鲜辣椒，富含维生素 C。可作主菜也可作配色提辣。',
-    image: '/images/vegetables/lajiao.svg',
+    image: '/images/vegetables/niujiajiao.svg',
     dishes: [
-      { name: '虎皮青椒', image: '/images/dishes/lajiao-hupiqingjiao.svg' },
-      { name: '辣椒炒肉', image: '/images/dishes/lajiao-chaorou.svg' },
-      { name: '剁椒鱼头', image: '/images/dishes/lajiao-duojiaoyutou.svg' },
+      { name: '虎皮青椒', image: '/images/dishes/niujiajiao-hupiqingjiao.svg' },
+      { name: '辣椒炒肉', image: '/images/dishes/niujiajiao-chaorou.svg' },
+      { name: '剁椒鱼头', image: '/images/dishes/niujiajiao-duojiaoyutou.svg' },
     ],
     price: 600,
   },
