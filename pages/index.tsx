@@ -9,6 +9,7 @@ import {
   type VegetableId,
   type VegetableWithId,
 } from '../data/vegetables';
+import { farm, mapEmbedUrl, mapLinkUrl } from '../data/farm';
 import { formatYen, formatYenRounded } from '../lib/format';
 import { assetPath } from '../lib/asset';
 import { MAX_WEIGHT, WEIGHT_STEP, parseWeight, stepWeight } from '../lib/weight';
@@ -136,6 +137,22 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
               </button>
             </>
           )}
+        </section>
+
+        <section className="map-section">
+          <h2>{farm.label}</h2>
+          <div className="map-frame">
+            <iframe
+              src={mapEmbedUrl}
+              title={farm.label}
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+          <a className="map-link" href={mapLinkUrl} target="_blank" rel="noreferrer">
+            在 Google 地图中打开 ↗
+          </a>
         </section>
       </main>
     </>
