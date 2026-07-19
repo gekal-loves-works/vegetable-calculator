@@ -1,6 +1,5 @@
 import { useState, type ChangeEvent } from 'react';
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
-import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -22,6 +21,8 @@ import {
 } from '../lib/weight';
 import { useWeights } from '../lib/useWeights';
 import { buildOrderText, parseOrderText } from '../lib/orderText';
+import { SeoHead } from '../components/SeoHead';
+import { site } from '../data/site';
 
 type Props = {
   items: VegetableWithId[];
@@ -89,10 +90,11 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
 
   return (
     <>
-      <Head>
-        <title>蔬菜价格一览 | 蔬菜价格计算</title>
-        <meta name="description" content="在售蔬菜单价一览与价格计算" />
-      </Head>
+      <SeoHead
+        title={`蔬菜价格一览 | ${site.name}`}
+        description={site.description}
+        path="/"
+      />
       <main className="container">
         <header className="page-header">
           <h1>蔬菜价格一览</h1>

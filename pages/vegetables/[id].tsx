@@ -1,6 +1,5 @@
 import type { ChangeEvent } from 'react';
 import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from 'next';
-import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -21,6 +20,8 @@ import {
   stepWeight,
 } from '../../lib/weight';
 import { useWeights } from '../../lib/useWeights';
+import { SeoHead } from '../../components/SeoHead';
+import { site } from '../../data/site';
 
 type Props = {
   id: VegetableId;
@@ -56,10 +57,11 @@ export default function VegetableDetail({
 
   return (
     <>
-      <Head>
-        <title>{`${vegetable.name} | 蔬菜价格计算`}</title>
-        <meta name="description" content={vegetable.description} />
-      </Head>
+      <SeoHead
+        title={`${vegetable.name} | ${site.name}`}
+        description={vegetable.description}
+        path={`/vegetables/${id}/`}
+      />
       <main className="container">
         <Link className="back-link" href="/">
           ← 返回列表

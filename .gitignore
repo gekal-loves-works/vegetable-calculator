@@ -5,3 +5,6 @@ out/
 .DS_Store
 *.log
 .env*.local
+
+# JetBrains
+.idea/
