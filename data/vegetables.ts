@@ -15,6 +15,11 @@ export type Vegetable = {
   dishes: readonly Dish[];
   /** 单价（日元／公斤，含税） */
   price: number;
+  /**
+   * 是否在售。蔬菜有季节性，过季时改成 false，
+   * 该品种连同价格会从列表消失，详情页也不再生成。
+   */
+  available: boolean;
 };
 
 /** 列表展示用，附带 id。 */
@@ -31,6 +36,7 @@ export const vegetables = {
       { name: '香菜羊肉汤', image: '/images/dishes/xiangcai-yangroutang.svg' },
     ],
     price: 1200,
+    available: true,
   },
   jiucai: {
     name: '韭菜',
@@ -42,6 +48,7 @@ export const vegetables = {
       { name: '韭菜饺子', image: '/images/dishes/jiucai-jiaozi.svg' },
     ],
     price: 600,
+    available: true,
   },
   sigua: {
     name: '丝瓜',
@@ -53,6 +60,7 @@ export const vegetables = {
       { name: '丝瓜蛤蜊汤', image: '/images/dishes/sigua-gelitang.svg' },
     ],
     price: 800,
+    available: true,
   },
   niujiajiao: {
     name: '牛角椒',
@@ -64,6 +72,7 @@ export const vegetables = {
       { name: '剁椒鱼头', image: '/images/dishes/niujiajiao-duojiaoyutou.svg' },
     ],
     price: 600,
+    available: true,
   },
   sijidou: {
     name: '四季豆',
@@ -75,6 +84,7 @@ export const vegetables = {
       { name: '蒜蓉四季豆', image: '/images/dishes/sijidou-suanrong.svg' },
     ],
     price: 800,
+    available: true,
   },
 } as const satisfies Record<string, Vegetable>;
 
@@ -82,4 +92,16 @@ export type VegetableId = keyof typeof vegetables;
 
 export function isVegetableId(value: string): value is VegetableId {
   return value in vegetables;
+}
+
+/**
+ * 过季的品种要从所有入口消失，所以列表、详情页、localStorage、
+ * 订单文本解析都应该走这里，而不是直接遍历 vegetables。
+ */
+export const availableVegetableIds = (Object.keys(vegetables) as VegetableId[]).filter(
+  (id) => vegetables[id].available,
+);
+
+export function isAvailableVegetableId(value: string): value is VegetableId {
+  return isVegetableId(value) && vegetables[value].available;
 }

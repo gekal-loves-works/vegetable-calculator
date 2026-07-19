@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {
   vegetables,
+  availableVegetableIds,
   PRICE_UNIT_LABEL,
   type VegetableId,
   type VegetableWithId,
@@ -96,7 +97,9 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
         <header className="page-header">
           <h1>蔬菜价格一览</h1>
           <p className="lead">
-            共 {items.length} 个品种，均按重量计价。输入各品种的重量即可算出总价。
+            {items.length === 0
+              ? '当前没有在售的蔬菜，请等待下一季。'
+              : `共 ${items.length} 个品种，均按重量计价。输入各品种的重量即可算出总价。`}
           </p>
         </header>
 
@@ -261,7 +264,8 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
 }
 
 export const getStaticProps: GetStaticProps<Props> = () => {
-  const items = (Object.keys(vegetables) as VegetableId[]).map((id) => ({
+  // 过季的品种不进入页面，连价格也不会出现在 HTML 里。
+  const items = availableVegetableIds.map((id) => ({
     id,
     ...vegetables[id],
   }));

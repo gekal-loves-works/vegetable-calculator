@@ -1,7 +1,8 @@
 import type { NextConfig } from 'next';
 
-// GitHub Pages 部署时需要仓库名作为 basePath，本地开发时为空。
-// GitHub Actions 中通过 NEXT_PUBLIC_BASE_PATH 注入。
+// 当前部署在自定义域名的根目录，basePath 为空，这里的机制不生效。
+// 如果以后改回 https://<user>.github.io/<repo>/ 这种子路径，
+// 在构建时设置 NEXT_PUBLIC_BASE_PATH=/<repo> 即可，代码不用改。
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 const nextConfig: NextConfig = {

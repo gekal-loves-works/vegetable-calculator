@@ -1,4 +1,4 @@
-import { vegetables, type VegetableId } from '../data/vegetables';
+import { vegetables, availableVegetableIds, type VegetableId } from '../data/vegetables';
 import { formatYenRounded } from './format';
 import { normalizeWeightInput } from './weight';
 import type { WeightMap } from './useWeights';
@@ -22,8 +22,11 @@ export function buildOrderText(rows: OrderRow[], total: number): string {
 /**
  * 品名可能互相包含（比如「豆角」和「四季豆角」），
  * 先匹配长的名字才不会认错。
+ *
+ * 只认在售品种：客户拿着过季前的订单文本回来时，
+ * 过季的那几种会被忽略，不会算进价格。
  */
-const idsByNameLength = (Object.keys(vegetables) as VegetableId[]).sort(
+const idsByNameLength = [...availableVegetableIds].sort(
   (a, b) => vegetables[b].name.length - vegetables[a].name.length,
 );
 

@@ -5,7 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {
   vegetables,
-  isVegetableId,
+  availableVegetableIds,
+  isAvailableVegetableId,
   PRICE_UNIT_LABEL,
   type Vegetable,
   type VegetableId,
@@ -155,14 +156,15 @@ export default function VegetableDetail({
 }
 
 export const getStaticPaths: GetStaticPaths<Params> = () => ({
-  paths: Object.keys(vegetables).map((id) => ({ params: { id } })),
+  // 过季的品种不生成详情页，旧链接会落到 404。
+  paths: availableVegetableIds.map((id) => ({ params: { id } })),
   fallback: false,
 });
 
 export const getStaticProps: GetStaticProps<Props, Params> = ({ params }) => {
   // fallback:false 且 getStaticPaths 返回了全部 id，正常情况下不会走到这里，
   // 加类型守卫只是为了收窄类型。
-  if (!params || !isVegetableId(params.id)) {
+  if (!params || !isAvailableVegetableId(params.id)) {
     return { notFound: true };
   }
 

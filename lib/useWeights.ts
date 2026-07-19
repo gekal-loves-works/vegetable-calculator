@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { isVegetableId, type VegetableId } from '../data/vegetables';
+import { isAvailableVegetableId, type VegetableId } from '../data/vegetables';
 
 const STORAGE_KEY = 'vegetable-calculator:weights';
 
@@ -8,7 +8,7 @@ export type WeightMap = Partial<Record<VegetableId, string>>;
 
 /**
  * 只保留当前在售品种的字符串值。
- * 商品下架或数据结构变更后，旧的 localStorage 内容不会污染状态。
+ * 商品过季、下架或数据结构变更后，旧的 localStorage 内容不会污染状态。
  */
 function parseStored(raw: string): WeightMap {
   const parsed: unknown = JSON.parse(raw);
@@ -20,7 +20,7 @@ function parseStored(raw: string): WeightMap {
   const result: WeightMap = {};
 
   for (const [key, value] of Object.entries(parsed)) {
-    if (isVegetableId(key) && typeof value === 'string') {
+    if (isAvailableVegetableId(key) && typeof value === 'string') {
       result[key] = value;
     }
   }
