@@ -12,7 +12,13 @@ import {
 } from '../../data/vegetables';
 import { formatYen, formatYenRounded } from '../../lib/format';
 import { assetPath } from '../../lib/asset';
-import { MAX_WEIGHT, WEIGHT_STEP, parseWeight, stepWeight } from '../../lib/weight';
+import {
+  MAX_WEIGHT,
+  WEIGHT_STEP,
+  normalizeWeightInput,
+  parseWeight,
+  stepWeight,
+} from '../../lib/weight';
 import { useWeights } from '../../lib/useWeights';
 
 type Props = {
@@ -41,6 +47,10 @@ export default function VegetableDetail({
 
   const handleStep = (direction: 1 | -1) => () => {
     setWeight(id, stepWeight(weightInput, direction));
+  };
+
+  const handleBlur = () => {
+    setWeight(id, normalizeWeightInput(weightInput));
   };
 
   return (
@@ -93,6 +103,7 @@ export default function VegetableDetail({
                 placeholder="0"
                 value={weightInput}
                 onChange={handleWeightChange}
+                onBlur={handleBlur}
               />
               <button
                 type="button"

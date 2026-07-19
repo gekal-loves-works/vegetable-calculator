@@ -123,8 +123,19 @@ a {
   cursor: default;
 }
 
+/* 已经有自己的 ± 按钮，浏览器自带的上下箭头只会占宽度、挤掉数字，去掉。 */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
 .card-calc input {
-  width: 52px;
+  width: 68px;
   text-align: center;
   padding: 6px 8px;
   font-size: 0.95rem;
@@ -187,6 +198,18 @@ a {
   font-variant-numeric: tabular-nums;
 }
 
+/* 明细默认收起，展开后也限制高度，避免这块把输入区顶出屏幕。 */
+.summary-details > summary {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.summary-details > summary:hover {
+  color: var(--accent);
+}
+
 .summary-list {
   list-style: none;
   margin: 12px 0 0;
@@ -194,6 +217,8 @@ a {
   border-top: 1px solid var(--border);
   font-size: 0.9rem;
   color: var(--muted);
+  max-height: 30vh;
+  overflow-y: auto;
 }
 
 .summary-list li {
@@ -202,8 +227,68 @@ a {
   gap: 12px;
 }
 
-.clear-button {
+.order-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 12px;
+}
+
+.order-button {
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--surface);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.order-button:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.order-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.import-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.import-box textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: inherit;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.import-box textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.order-status {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
+.clear-button {
+  margin-top: 0;
   padding: 6px 14px;
   font: inherit;
   font-size: 0.85rem;
@@ -343,7 +428,7 @@ a {
 }
 
 .calculator input {
-  width: 90px;
+  width: 110px;
   text-align: center;
   padding: 8px 10px;
   font-size: 1rem;

@@ -77,7 +77,10 @@ export function useWeights() {
     });
   }, []);
 
+  /** 整体替换（导入订单文本时用）。 */
+  const replaceWeights = useCallback((next: WeightMap) => setWeights(next), []);
+
   const clearWeights = useCallback(() => setWeights({}), []);
 
-  return { weights, setWeight, clearWeights, loaded };
+  return { weights, setWeight, replaceWeights, clearWeights, loaded };
 }

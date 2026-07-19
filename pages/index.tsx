@@ -1,4 +1,4 @@
-import type { ChangeEvent } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -12,15 +12,25 @@ import {
 import { farm, mapEmbedUrl, mapSearchUrl, mapDirectionsUrl } from '../data/farm';
 import { formatYen, formatYenRounded } from '../lib/format';
 import { assetPath } from '../lib/asset';
-import { MAX_WEIGHT, WEIGHT_STEP, parseWeight, stepWeight } from '../lib/weight';
+import {
+  MAX_WEIGHT,
+  WEIGHT_STEP,
+  normalizeWeightInput,
+  parseWeight,
+  stepWeight,
+} from '../lib/weight';
 import { useWeights } from '../lib/useWeights';
+import { buildOrderText, parseOrderText } from '../lib/orderText';
 
 type Props = {
   items: VegetableWithId[];
 };
 
 export default function Home({ items }: InferGetStaticPropsType<typeof getStaticProps>) {
-  const { weights, setWeight, clearWeights } = useWeights();
+  const { weights, setWeight, replaceWeights, clearWeights } = useWeights();
+  const [importOpen, setImportOpen] = useState(false);
+  const [importText, setImportText] = useState('');
+  const [status, setStatus] = useState('');
 
   const rows = items.map((item) => {
     const weight = parseWeight(weights[item.id] ?? '');
@@ -36,6 +46,44 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
 
   const handleStep = (id: VegetableId, direction: 1 | -1) => () => {
     setWeight(id, stepWeight(weights[id] ?? '', direction));
+  };
+
+  const handleBlur = (id: VegetableId) => () => {
+    setWeight(id, normalizeWeightInput(weights[id] ?? ''));
+  };
+
+  const orderText = buildOrderText(selected, grandTotal);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(orderText);
+      setStatus('已复制，可以直接粘贴到聊天里');
+    } catch {
+      // http 页面或浏览器不允许时会失败，退回到手动复制。
+      setImportOpen(true);
+      setImportText(orderText);
+      setStatus('无法自动复制，请手动选中下面的文本复制');
+    }
+  };
+
+  const handleImport = () => {
+    const parsed = parseOrderText(importText);
+    const count = Object.keys(parsed).length;
+
+    if (count === 0) {
+      setStatus('没有识别到品种，请确认文本里有「品名 数量 公斤」');
+      return;
+    }
+
+    replaceWeights(parsed);
+    setImportText('');
+    setImportOpen(false);
+    setStatus(`已导入 ${count} 种`);
+  };
+
+  const handleClear = () => {
+    clearWeights();
+    setStatus('');
   };
 
   return (
@@ -95,6 +143,7 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
                   placeholder="0"
                   value={weights[row.id] ?? ''}
                   onChange={handleWeightChange(row.id)}
+                  onBlur={handleBlur(row.id)}
                 />
                 <button
                   type="button"
@@ -120,8 +169,10 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
             <strong className="summary-total">{formatYenRounded(grandTotal)}</strong>
           </div>
 
+          {/* 选得多时明细会把这块撑得很高，手机上会挡住输入框，所以默认收起。 */}
           {selected.length > 0 && (
-            <>
+            <details className="summary-details">
+              <summary>明细</summary>
               <ul className="summary-list">
                 {selected.map((row) => (
                   <li key={row.id}>
@@ -132,11 +183,51 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
                   </li>
                 ))}
               </ul>
-              <button type="button" className="clear-button" onClick={clearWeights}>
+            </details>
+          )}
+
+          <div className="order-actions">
+            <button
+              type="button"
+              className="order-button"
+              onClick={handleCopy}
+              disabled={selected.length === 0}
+            >
+              复制订单
+            </button>
+            <button
+              type="button"
+              className="clear-button"
+              onClick={() => setImportOpen((open) => !open)}
+            >
+              {importOpen ? '取消导入' : '粘贴导入'}
+            </button>
+            {selected.length > 0 && (
+              <button type="button" className="clear-button" onClick={handleClear}>
                 清空
               </button>
-            </>
+            )}
+          </div>
+
+          {importOpen && (
+            <div className="import-box">
+              <label className="visually-hidden" htmlFor="order-text">
+                订单文本
+              </label>
+              <textarea
+                id="order-text"
+                rows={5}
+                value={importText}
+                onChange={(event) => setImportText(event.target.value)}
+                placeholder={'把收到的订单文本粘贴到这里，例如\n香菜 × 1.5 公斤 = ¥1,800'}
+              />
+              <button type="button" className="order-button" onClick={handleImport}>
+                导入
+              </button>
+            </div>
           )}
+
+          {status !== '' && <p className="order-status">{status}</p>}
         </section>
 
         <section className="map-section">
