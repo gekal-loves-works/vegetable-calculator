@@ -1,0 +1,174 @@
+:root {
+  --bg: #f7f8f5;
+  --surface: #ffffff;
+  --border: #e2e5dd;
+  --text: #22261f;
+  --muted: #6b7263;
+  --accent: #3f7d3a;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', 'Segoe UI',
+    sans-serif;
+  line-height: 1.7;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.container {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 40px 20px 64px;
+}
+
+.page-header h1 {
+  margin: 0 0 8px;
+  font-size: 1.8rem;
+}
+
+.lead {
+  margin: 0 0 32px;
+  color: var(--muted);
+}
+
+.card-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.card-name {
+  font-weight: 600;
+}
+
+.card-price {
+  font-size: 1.4rem;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.card-unit {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-left: 6px;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 24px;
+  color: var(--muted);
+}
+
+.back-link:hover {
+  color: var(--accent);
+}
+
+.detail {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+}
+
+.detail h1 {
+  margin: 0 0 8px;
+  font-size: 1.6rem;
+}
+
+.detail h2 {
+  margin: 28px 0 6px;
+  font-size: 1rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.detail p {
+  margin: 0;
+}
+
+.price-tag {
+  font-size: 1.8rem;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.calculator {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.calculator label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.calculator input {
+  width: 120px;
+  padding: 8px 10px;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: inherit;
+}
+
+.calculator input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.total {
+  margin-top: 16px;
+  font-size: 1.2rem;
+}
+
+.total strong {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16180f;
+    --surface: #1f2218;
+    --border: #333829;
+    --text: #eef0e8;
+    --muted: #9aa38d;
+    --accent: #8fc98a;
+  }
+}
