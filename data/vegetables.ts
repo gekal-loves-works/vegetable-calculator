@@ -63,7 +63,7 @@ export const vegetables = {
       { name: '辣椒炒肉', image: '/images/dishes/lajiao-chaorou.svg' },
       { name: '剁椒鱼头', image: '/images/dishes/lajiao-duojiaoyutou.svg' },
     ],
-    price: 220,
+    price: 600,
   },
   sijidou: {
     name: '四季豆',
