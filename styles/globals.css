@@ -411,9 +411,27 @@ a {
   display: block;
 }
 
+.map-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.map-button {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  color: var(--surface);
+  background: var(--accent);
+  border-radius: 8px;
+}
+
+.map-button:hover {
+  opacity: 0.85;
+}
+
 .map-link {
-  display: inline-block;
-  margin-top: 10px;
   font-size: 0.9rem;
   color: var(--muted);
 }

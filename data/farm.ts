@@ -16,5 +16,14 @@ const coordinates = `${farm.latitude},${farm.longitude}`;
  */
 export const mapEmbedUrl = `https://www.google.com/maps?q=${coordinates}&z=${farm.zoom}&hl=zh-CN&output=embed`;
 
-/** 在 Google 地图中打开（新标签页）。 */
-export const mapLinkUrl = `https://www.google.com/maps/@${coordinates},${farm.zoom}z`;
+/**
+ * 以下用 Google Maps URLs 官方格式（api=1）。
+ * `/maps/@lat,lng,18z` 只是把地图移到该位置，不会放置图钉，
+ * 因此无法作为导航目的地，不要用那种形式。
+ */
+
+/** 在 Google 地图中打开并显示图钉。 */
+export const mapSearchUrl = `https://www.google.com/maps/search/?api=1&query=${coordinates}`;
+
+/** 导航到菜地。不指定 origin，Google 会以用户当前位置作为起点。 */
+export const mapDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${coordinates}`;

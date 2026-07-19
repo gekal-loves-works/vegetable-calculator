@@ -9,7 +9,7 @@ import {
   type VegetableId,
   type VegetableWithId,
 } from '../data/vegetables';
-import { farm, mapEmbedUrl, mapLinkUrl } from '../data/farm';
+import { farm, mapEmbedUrl, mapSearchUrl, mapDirectionsUrl } from '../data/farm';
 import { formatYen, formatYenRounded } from '../lib/format';
 import { assetPath } from '../lib/asset';
 import { MAX_WEIGHT, WEIGHT_STEP, parseWeight, stepWeight } from '../lib/weight';
@@ -150,9 +150,19 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
               referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
-          <a className="map-link" href={mapLinkUrl} target="_blank" rel="noreferrer">
-            在 Google 地图中打开 ↗
-          </a>
+          <div className="map-actions">
+            <a
+              className="map-button"
+              href={mapDirectionsUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              导航到这里 ↗
+            </a>
+            <a className="map-link" href={mapSearchUrl} target="_blank" rel="noreferrer">
+              在 Google 地图中打开 ↗
+            </a>
+          </div>
         </section>
       </main>
     </>
