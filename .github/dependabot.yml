@@ -1,0 +1,46 @@
+version: 2
+
+updates:
+  # GitHub Actions 本身。Node 20 弃用这类警告就是靠这个跟上。
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: ci
+    groups:
+      # 官方 actions 一起升，避免一次开五个 PR。
+      actions:
+        patterns:
+          - 'actions/*'
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: deps
+      prefix-development: deps-dev
+    groups:
+      # 补丁和小版本合成一个 PR，噪音小。
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    ignore:
+      # React 大版本要跟着 Next.js 走，不单独升。
+      - dependency-name: react
+        update-types: [version-update:semver-major]
+      - dependency-name: react-dom
+        update-types: [version-update:semver-major]
+      # TypeScript 由 Next.js 决定支持范围，之前装 7.x 时 Next 15 直接构建失败过。
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]

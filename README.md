@@ -160,6 +160,19 @@ env:
 
 代码不用改——`lib/asset.ts` 会给图片补前缀（`next/image` 在 `unoptimized` 下不会自动补）。
 
+## 依赖更新
+
+Dependabot 每周一早上检查更新（`.github/dependabot.yml`）：
+
+- **github-actions** — Node 20 弃用这类警告靠它跟上，官方 actions 打包成一个 PR
+- **npm** — minor / patch 合成一个 PR；major 单独开
+
+React 和 TypeScript 的大版本被忽略了，因为要跟着 Next.js 走
+（装过 TypeScript 7.x，Next 15 直接构建失败）。升 Next.js 时一起手动升。
+
+PR 会跑 `.github/workflows/ci.yml`（typecheck + build）。
+部署工作流只在 push 到 main 时触发，所以 PR 阶段需要单独的验证。
+
 ## 已知限制
 
 - `public/images/` 全是占位图，需要换成真实照片
