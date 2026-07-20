@@ -97,6 +97,21 @@ SNS 分享时显示的卡片靠 OGP 标签（`components/SeoHead.tsx`），
 - `og:url` 和 `og:image` 必须是绝对地址，所以 `origin` 要和实际域名一致
 - 卡片图是 `public/og-image.png`（1200×630）。多数平台不认 SVG，必须用 PNG/JPEG
 
+### 图标
+
+`public/favicon.svg` 是唯一的源文件（绿底 + 计算器 + 嫩芽）。改了以后要重新导出各尺寸：
+
+| 文件 | 尺寸 | 用途 |
+| --- | --- | --- |
+| `favicon.svg` | 矢量 | 现代浏览器标签页 |
+| `favicon-32.png` | 32 | 旧浏览器回退 |
+| `apple-touch-icon.png` | 180 | iOS 添加到主屏幕（圆角由系统加，所以这张是直角满铺） |
+| `favicon-192/512.png` | 192 / 512 | `site.webmanifest`（Android 主屏幕） |
+
+导出用无头 Chrome 截图即可，仓库里没有装图形库。
+
+### 分享卡片的缓存
+
 改了以后各平台会缓存旧卡片，用官方调试器强制刷新：
 
 - Facebook：<https://developers.facebook.com/tools/debug/>
