@@ -6,6 +6,8 @@ type Props = {
   description: string;
   /** 站内路径，如 '/' 或 '/vegetables/xiangcai/'。 */
   path: string;
+  /** 不希望被搜索引擎收录的页面（如 404）。此时 canonical 也不该指向自己。 */
+  noindex?: boolean;
 };
 
 /**
@@ -14,7 +16,7 @@ type Props = {
  * 没有这些标签时，LINE / WeChat / X 只会显示一条光秃秃的网址。
  * og:url 和 og:image 必须是绝对地址。
  */
-export function SeoHead({ title, description, path }: Props) {
+export function SeoHead({ title, description, path, noindex = false }: Props) {
   const url = absoluteUrl(path);
   const image = absoluteUrl(site.ogImage);
 
@@ -22,7 +24,11 @@ export function SeoHead({ title, description, path }: Props) {
     <Head>
       <title>{title}</title>
       <meta name="description" content={description} />
-      <link rel="canonical" href={url} />
+      {noindex ? (
+        <meta name="robots" content="noindex" />
+      ) : (
+        <link rel="canonical" href={url} />
+      )}
 
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content={site.name} />

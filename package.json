@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "// postbuild": "trailingSlash 让 404 页导出成 out/404/index.html，但 GitHub Pages 只认根目录的 404.html",
+    "postbuild": "cp out/404/index.html out/404.html",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"

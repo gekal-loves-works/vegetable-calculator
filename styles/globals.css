@@ -551,6 +551,41 @@ input[type='number'] {
   margin-top: 8px;
 }
 
+/* 404。复用 .detail 的卡片外观，只补这一页特有的部分。 */
+.not-found-code {
+  font-size: 3rem;
+  line-height: 1.2;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.not-found-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.not-found-list a {
+  display: inline-block;
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.not-found-list a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.detail .not-found-actions {
+  margin-top: 28px;
+}
+
 .map-section {
   margin-top: 40px;
 }
