@@ -26,10 +26,6 @@ jobs:
 
       - run: npm ci
 
-      # generated.ts 是提交进仓库的，改了 .md 却忘了重新生成的话在这里拦下来。
-      - name: Check generated vegetable data is up to date
-        run: npm run check:data
-
       - name: Typecheck
         run: npm run typecheck
 

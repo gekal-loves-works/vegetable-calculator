@@ -3,12 +3,11 @@ import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
-  vegetables,
-  availableVegetableIds,
   PRICE_UNIT_LABEL,
   type VegetableId,
   type VegetableWithId,
-} from '../data/vegetables';
+} from '../lib/vegetables';
+import { loadAvailableVegetables } from '../lib/vegetables.server';
 import { farm, mapEmbedUrl, mapSearchUrl, mapDirectionsUrl } from '../data/farm';
 import { formatYen, formatYenRounded } from '../lib/format';
 import { assetPath } from '../lib/asset';
@@ -29,7 +28,9 @@ type Props = {
 };
 
 export default function Home({ items }: InferGetStaticPropsType<typeof getStaticProps>) {
-  const { weights, setWeight, replaceWeights, clearWeights } = useWeights();
+  const { weights, setWeight, replaceWeights, clearWeights } = useWeights(
+    items.map((item) => item.id),
+  );
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState('');
   const [status, setStatus] = useState('');
@@ -69,7 +70,7 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
   };
 
   const handleImport = () => {
-    const parsed = parseOrderText(importText);
+    const parsed = parseOrderText(importText, items);
     const count = Object.keys(parsed).length;
 
     if (count === 0) {
@@ -266,11 +267,7 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
 }
 
 export const getStaticProps: GetStaticProps<Props> = () => {
-  // 过季的品种不进入页面，连价格也不会出现在 HTML 里。
-  const items = availableVegetableIds.map((id) => ({
-    id,
-    ...vegetables[id],
-  }));
-
-  return { props: { items } };
+  // 构建时读 data/vegetables/*.md。过季的品种不进入页面，
+  // 连价格也不会出现在 HTML 里。
+  return { props: { items: loadAvailableVegetables() } };
 };

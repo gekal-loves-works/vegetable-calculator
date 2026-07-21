@@ -3,13 +3,11 @@ import type { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from 'ne
 import Image from 'next/image';
 import Link from 'next/link';
 import {
-  vegetables,
-  availableVegetableIds,
-  isAvailableVegetableId,
   PRICE_UNIT_LABEL,
   type Vegetable,
   type VegetableId,
-} from '../../data/vegetables';
+} from '../../lib/vegetables';
+import { loadAvailableVegetables } from '../../lib/vegetables.server';
 import { formatYen, formatYenRounded } from '../../lib/format';
 import { assetPath } from '../../lib/asset';
 import {
@@ -26,6 +24,8 @@ import { site } from '../../data/site';
 type Props = {
   id: VegetableId;
   vegetable: Vegetable;
+  /** useWeights 要靠它筛掉 localStorage 里已下架的品种，浏览器里读不到 .md。 */
+  availableIds: VegetableId[];
 };
 
 type Params = {
@@ -35,9 +35,10 @@ type Params = {
 export default function VegetableDetail({
   id,
   vegetable,
+  availableIds,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   // 和列表页共用同一份持久化状态，两边互相同步。
-  const { weights, setWeight } = useWeights();
+  const { weights, setWeight } = useWeights(availableIds);
 
   const weightInput = weights[id] ?? '';
   const weight = parseWeight(weightInput);
@@ -159,16 +160,24 @@ export default function VegetableDetail({
 
 export const getStaticPaths: GetStaticPaths<Params> = () => ({
   // 过季的品种不生成详情页，旧链接会落到 404。
-  paths: availableVegetableIds.map((id) => ({ params: { id } })),
+  paths: loadAvailableVegetables().map((vegetable) => ({ params: { id: vegetable.id } })),
   fallback: false,
 });
 
 export const getStaticProps: GetStaticProps<Props, Params> = ({ params }) => {
-  // fallback:false 且 getStaticPaths 返回了全部 id，正常情况下不会走到这里，
-  // 加类型守卫只是为了收窄类型。
-  if (!params || !isAvailableVegetableId(params.id)) {
+  const available = loadAvailableVegetables();
+  const vegetable = params ? available.find((item) => item.id === params.id) : undefined;
+
+  // fallback:false 且 getStaticPaths 返回了全部 id，正常情况下不会走到这里。
+  if (!vegetable) {
     return { notFound: true };
   }
 
-  return { props: { id: params.id, vegetable: vegetables[params.id] } };
+  return {
+    props: {
+      id: vegetable.id,
+      vegetable,
+      availableIds: available.map((item) => item.id),
+    },
+  };
 };

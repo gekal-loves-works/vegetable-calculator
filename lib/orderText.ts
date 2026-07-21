@@ -1,4 +1,4 @@
-import { vegetables, availableVegetableIds, type VegetableId } from '../data/vegetables';
+import type { VegetableId, VegetableName } from './vegetables';
 import { formatYenRounded } from './format';
 import { normalizeWeightInput } from './weight';
 import type { WeightMap } from './useWeights';
@@ -20,24 +20,19 @@ export function buildOrderText(rows: OrderRow[], total: number): string {
 }
 
 /**
- * 品名可能互相包含（比如「豆角」和「四季豆角」），
- * 先匹配长的名字才不会认错。
- *
- * 只认在售品种：客户拿着过季前的订单文本回来时，
- * 过季的那几种会被忽略，不会算进价格。
- */
-const idsByNameLength = [...availableVegetableIds].sort(
-  (a, b) => vegetables[b].name.length - vegetables[a].name.length,
-);
-
-/**
  * 把客户发回来的文本解析成重量。
  *
  * 只认「品名 + 数字 + 公斤／kg」这个组合，所以对方顺手改了排版、
  * 加了寒暄或者删掉金额也照样能读出来。认不出的行直接跳过。
+ *
+ * catalog 只传在售品种（页面从 getStaticProps 的 props 里给）：客户拿着
+ * 过季前的订单文本回来时，过季的那几种会被忽略，不会算进价格。
  */
-export function parseOrderText(text: string): WeightMap {
+export function parseOrderText(text: string, catalog: readonly VegetableName[]): WeightMap {
   const result: WeightMap = {};
+
+  // 品名可能互相包含（比如「豆角」和「四季豆角」），先匹配长的名字才不会认错。
+  const byNameLength = [...catalog].sort((a, b) => b.name.length - a.name.length);
 
   for (const rawLine of text.split(/\r?\n/)) {
     const line = rawLine.trim();
@@ -47,9 +42,9 @@ export function parseOrderText(text: string): WeightMap {
       continue;
     }
 
-    const id = idsByNameLength.find((candidate) => line.includes(vegetables[candidate].name));
+    const matchedVegetable = byNameLength.find((candidate) => line.includes(candidate.name));
 
-    if (!id) {
+    if (!matchedVegetable) {
       continue;
     }
 
@@ -62,7 +57,7 @@ export function parseOrderText(text: string): WeightMap {
     const normalized = normalizeWeightInput(matched[1]);
 
     if (normalized !== '') {
-      result[id] = normalized;
+      result[matchedVegetable.id] = normalized;
     }
   }
 

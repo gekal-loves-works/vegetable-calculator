@@ -3,11 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build:data": "node scripts/build-vegetables.mjs",
-    "check:data": "node scripts/build-vegetables.mjs --check",
-    "predev": "npm run build:data",
     "dev": "next dev",
-    "prebuild": "npm run build:data",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

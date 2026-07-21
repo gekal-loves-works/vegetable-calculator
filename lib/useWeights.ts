@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { isAvailableVegetableId, type VegetableId } from '../data/vegetables';
+import type { VegetableId } from './vegetables';
 
 const STORAGE_KEY = 'vegetable-calculator:weights';
 
@@ -10,7 +10,7 @@ export type WeightMap = Partial<Record<VegetableId, string>>;
  * 只保留当前在售品种的字符串值。
  * 商品过季、下架或数据结构变更后，旧的 localStorage 内容不会污染状态。
  */
-function parseStored(raw: string): WeightMap {
+function parseStored(raw: string, availableIds: ReadonlySet<string>): WeightMap {
   const parsed: unknown = JSON.parse(raw);
 
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
@@ -20,7 +20,7 @@ function parseStored(raw: string): WeightMap {
   const result: WeightMap = {};
 
   for (const [key, value] of Object.entries(parsed)) {
-    if (isAvailableVegetableId(key) && typeof value === 'string') {
+    if (availableIds.has(key) && typeof value === 'string') {
       result[key] = value;
     }
   }
@@ -34,24 +34,30 @@ function parseStored(raw: string): WeightMap {
  * 静态导出的页面在服务端预渲染，读 localStorage 必须放在 useEffect 里，
  * 否则首次渲染的结果会和服务端不一致（hydration mismatch）。
  * 因此首帧一定是空值，读取完成后才填入。
+ *
+ * availableIds 由页面从 getStaticProps 的 props 传进来。数据在构建时读取，
+ * 这个 hook 跑在浏览器里，拿不到 data/vegetables/*.md，只能靠调用方给。
  */
-export function useWeights() {
+export function useWeights(availableIds: readonly string[]) {
   const [weights, setWeights] = useState<WeightMap>({});
   // 读取完成前不要回写，否则会用初始空值覆盖掉已保存的数据。
   const [loaded, setLoaded] = useState(false);
+
+  // 数组每帧都是新对象，直接进依赖会让 effect 反复触发，所以用内容拼成的字符串做依赖。
+  const idKey = availableIds.join(',');
 
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        setWeights(parseStored(raw));
+        setWeights(parseStored(raw, new Set(idKey.split(','))));
       }
     } catch {
       // 隐私模式或存储被禁用时忽略，退化成不持久化。
     }
 
     setLoaded(true);
-  }, []);
+  }, [idKey]);
 
   useEffect(() => {
     if (!loaded) {
