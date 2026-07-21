@@ -22,7 +22,8 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          # 版本只在 .nvmrc 里维护，本地和 CI 不会各写一份。
+          node-version-file: .nvmrc
           cache: npm
 
       - run: npm ci

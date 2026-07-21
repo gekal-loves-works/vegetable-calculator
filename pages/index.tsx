@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from 'react';
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -27,6 +33,12 @@ type Props = {
   items: VegetableWithId[];
 };
 
+// 服务端渲染时没有 layout 阶段，用 useEffect 顶替以免 React 警告。
+const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+// 点钉住项回跳时，卡片顶部离钉住条留出的间距。
+const SCROLL_GAP = 12;
+
 export default function Home({ items }: InferGetStaticPropsType<typeof getStaticProps>) {
   const { weights, setWeight, replaceWeights, clearWeights } = useWeights(
     items.map((item) => item.id),
@@ -43,16 +55,37 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
   };
   // 滚出屏幕的卡片里、最靠近顶部的最多三张，钉在头部。
   const [pinnedIds, setPinnedIds] = useState<VegetableId[]>([]);
+  const barRef = useRef<HTMLDivElement | null>(null);
+  const barHeightRef = useRef(0);
+
+  // 钉住条是 fixed 的，本身不占位，出现的一瞬间会盖住正在看的卡片。
+  // 所以把实测的条高交给 body 当上内边距，内容整体下移同样的距离；
+  // 在浏览器绘制前写入，避免闪一帧遮挡。
+  useIsomorphicLayoutEffect(() => {
+    const height = barRef.current?.offsetHeight ?? 0;
+    barHeightRef.current = height;
+    document.documentElement.style.setProperty('--pinned-bar-h', `${height}px`);
+  }, [pinnedIds]);
+
+  useEffect(
+    () => () => {
+      document.documentElement.style.removeProperty('--pinned-bar-h');
+    },
+    [],
+  );
 
   useEffect(() => {
     let frame = 0;
     const recompute = () => {
       frame = 0;
+      const barHeight = barHeightRef.current;
       const above: VegetableId[] = [];
       for (const item of items) {
         const el = cardRefs.current.get(item.id);
-        // bottom <= 0 表示整张卡片都在视口上沿之上，即已完全滚出。
-        if (el && el.getBoundingClientRect().bottom <= 0) above.push(item.id);
+        // 内容已经被上内边距整体下移了 barHeight，所以「卡片底边落在钉住条下沿之上」
+        // 就等于没有上内边距时的「完全滚出屏幕」。两边同时增减，钉住条变高时
+        // 判定不会翻转，卡片也就不会在钉住 / 取消钉住之间抖动。
+        if (el && el.getBoundingClientRect().bottom <= barHeight) above.push(item.id);
       }
       const next = above.slice(-3);
       setPinnedIds((prev) =>
@@ -73,7 +106,12 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
   }, [items]);
 
   const scrollToCard = (id: VegetableId) => {
-    cardRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const el = cardRefs.current.get(id);
+    if (!el) return;
+    // scrollIntoView 用不了：回跳途中钉住项会减少，上内边距跟着变，卡片会被带偏。
+    // 换算成「去掉上内边距后的文档坐标」再滚，落点就与条高无关，稳定停在条的下方。
+    const top = el.getBoundingClientRect().top + window.scrollY - barHeightRef.current;
+    window.scrollTo({ top: top - SCROLL_GAP, behavior: 'smooth' });
   };
 
   const rows = items.map((item) => {
@@ -138,7 +176,12 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
         path="/"
       />
       {pinnedIds.length > 0 && (
-        <div className="pinned-bar" role="navigation" aria-label="已滚出屏幕的品种">
+        <div
+          className="pinned-bar"
+          ref={barRef}
+          role="navigation"
+          aria-label="已滚出屏幕的品种"
+        >
           {pinnedIds.map((id) => {
             const row = rows.find((item) => item.id === id);
             if (!row) return null;

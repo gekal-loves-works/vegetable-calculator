@@ -24,6 +24,12 @@ body {
   line-height: 1.7;
 }
 
+/* 首页顶部的钉住条是 fixed 的，这里空出等高的位置，别让它盖住正在看的卡片。
+   没有钉住项（以及其他页面）时是 0，高度由 pages/index.tsx 实测后写入。 */
+body {
+  padding-top: var(--pinned-bar-h, 0px);
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -62,8 +68,8 @@ a {
   border-radius: var(--radius);
   overflow: hidden;
   transition: border-color 0.15s ease, transform 0.15s ease;
-  /* 点钉住的品种回跳时，别被固定头部挡住（最多三行钉住项）。 */
-  scroll-margin-top: 160px;
+  /* 回跳的落点由 scrollToCard() 直接算，这里只管锚点跳转等浏览器自带的滚动。 */
+  scroll-margin-top: calc(var(--pinned-bar-h, 0px) + 12px);
 }
 
 /* 菜品多、往下滚时，已滚出屏幕的最后三张钉在顶部，保留上下文。 */

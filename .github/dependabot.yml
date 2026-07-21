@@ -1,7 +1,7 @@
 version: 2
 
 updates:
-  # GitHub Actions 本身。Node 20 弃用这类警告就是靠这个跟上。
+  # GitHub Actions 本身。运行时弃用（如 Node 20 下线）这类警告就是靠这个跟上。
   - package-ecosystem: github-actions
     directory: /
     schedule:

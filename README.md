@@ -16,6 +16,8 @@
 
 ## 开发
 
+需要 Node 24（版本记在 `.nvmrc`，`nvm use` 即可；CI 也读同一个文件）。
+
 ```bash
 npm install
 npm run dev        # http://localhost:3000
@@ -192,7 +194,7 @@ env:
 
 Dependabot 每周一早上检查更新（`.github/dependabot.yml`）：
 
-- **github-actions** — Node 20 弃用这类警告靠它跟上，官方 actions 打包成一个 PR
+- **github-actions** — 运行时弃用（如 Node 20 下线）这类警告靠它跟上，官方 actions 打包成一个 PR
 - **npm** — minor / patch 合成一个 PR；major 单独开
 
 React 和 TypeScript 的大版本被忽略了，因为要跟着 Next.js 走
