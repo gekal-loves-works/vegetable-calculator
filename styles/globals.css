@@ -62,6 +62,70 @@ a {
   border-radius: var(--radius);
   overflow: hidden;
   transition: border-color 0.15s ease, transform 0.15s ease;
+  /* 点钉住的品种回跳时，别被固定头部挡住（最多三行钉住项）。 */
+  scroll-margin-top: 160px;
+}
+
+/* 菜品多、往下滚时，已滚出屏幕的最后三张钉在顶部，保留上下文。 */
+.pinned-bar {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 840px;
+  padding: 8px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 8%);
+}
+
+.pinned-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 5px 12px 5px 6px;
+  font: inherit;
+  color: inherit;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.pinned-chip:hover {
+  border-color: var(--accent);
+}
+
+.pinned-chip-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.pinned-chip-name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.9rem;
+}
+
+.pinned-chip-sub {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .card-image {

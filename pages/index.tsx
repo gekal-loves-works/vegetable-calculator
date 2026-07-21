@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -34,6 +34,47 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState('');
   const [status, setStatus] = useState('');
+
+  // 每张卡片的 <li>，用来判断哪几张已经滚出屏幕上沿。
+  const cardRefs = useRef(new Map<VegetableId, HTMLLIElement>());
+  const setCardRef = (id: VegetableId) => (el: HTMLLIElement | null) => {
+    if (el) cardRefs.current.set(id, el);
+    else cardRefs.current.delete(id);
+  };
+  // 滚出屏幕的卡片里、最靠近顶部的最多三张，钉在头部。
+  const [pinnedIds, setPinnedIds] = useState<VegetableId[]>([]);
+
+  useEffect(() => {
+    let frame = 0;
+    const recompute = () => {
+      frame = 0;
+      const above: VegetableId[] = [];
+      for (const item of items) {
+        const el = cardRefs.current.get(item.id);
+        // bottom <= 0 表示整张卡片都在视口上沿之上，即已完全滚出。
+        if (el && el.getBoundingClientRect().bottom <= 0) above.push(item.id);
+      }
+      const next = above.slice(-3);
+      setPinnedIds((prev) =>
+        prev.length === next.length && prev.every((v, i) => v === next[i]) ? prev : next,
+      );
+    };
+    const onScroll = () => {
+      if (frame === 0) frame = requestAnimationFrame(recompute);
+    };
+    recompute();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [items]);
+
+  const scrollToCard = (id: VegetableId) => {
+    cardRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const rows = items.map((item) => {
     const weight = parseWeight(weights[item.id] ?? '');
@@ -96,6 +137,36 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
         description={site.description}
         path="/"
       />
+      {pinnedIds.length > 0 && (
+        <div className="pinned-bar" role="navigation" aria-label="已滚出屏幕的品种">
+          {pinnedIds.map((id) => {
+            const row = rows.find((item) => item.id === id);
+            if (!row) return null;
+            return (
+              <button
+                key={id}
+                type="button"
+                className="pinned-chip"
+                onClick={() => scrollToCard(id)}
+                aria-label={`回到 ${row.name}`}
+              >
+                <Image
+                  className="pinned-chip-thumb"
+                  src={assetPath(row.image)}
+                  alt=""
+                  width={56}
+                  height={56}
+                />
+                <span className="pinned-chip-name">{row.name}</span>
+                {row.weight > 0 && (
+                  <span className="pinned-chip-sub">{formatYenRounded(row.subtotal)}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       <main className="container">
         <header className="page-header">
           <h1>蔬菜价格一览</h1>
@@ -108,7 +179,7 @@ export default function Home({ items }: InferGetStaticPropsType<typeof getStatic
 
         <ul className="card-grid">
           {rows.map((row) => (
-            <li key={row.id} className="card">
+            <li key={row.id} className="card" ref={setCardRef(row.id)}>
               <Link className="card-link" href={`/vegetables/${row.id}`}>
                 <Image
                   className="card-image"
