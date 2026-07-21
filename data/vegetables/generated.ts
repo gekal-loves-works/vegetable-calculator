@@ -1,29 +1,6 @@
-/** 所有商品统一按重量计价，单价基准为 1 公斤。 */
-export const PRICE_UNIT_LABEL = '1公斤';
-
-/** 推荐料理。image 为 public/ 下的绝对路径，basePath 由 next/image 自动补全。 */
-export type Dish = {
-  name: string;
-  image: string;
-};
-
-export type Vegetable = {
-  name: string;
-  description: string;
-  /** 介绍图片，public/ 下的绝对路径。 */
-  image: string;
-  dishes: readonly Dish[];
-  /** 单价（日元／公斤，含税） */
-  price: number;
-  /**
-   * 是否在售。蔬菜有季节性，过季时改成 false，
-   * 该品种连同价格会从列表消失，详情页也不再生成。
-   */
-  available: boolean;
-};
-
-/** 列表展示用，附带 id。 */
-export type VegetableWithId = Vegetable & { id: VegetableId };
+// 此文件由 scripts/build-vegetables.mjs 生成，请勿手动编辑。
+// 要改蔬菜数据，编辑 data/vegetables/<id>.md，然后运行 `npm run build:data`。
+// 键的顺序来自各文件 frontmatter 里的 order，它决定列表页的展示顺序。
 
 export const vegetables = {
   xiangcai: {
@@ -86,22 +63,4 @@ export const vegetables = {
     price: 800,
     available: true,
   },
-} as const satisfies Record<string, Vegetable>;
-
-export type VegetableId = keyof typeof vegetables;
-
-export function isVegetableId(value: string): value is VegetableId {
-  return value in vegetables;
-}
-
-/**
- * 过季的品种要从所有入口消失，所以列表、详情页、localStorage、
- * 订单文本解析都应该走这里，而不是直接遍历 vegetables。
- */
-export const availableVegetableIds = (Object.keys(vegetables) as VegetableId[]).filter(
-  (id) => vegetables[id].available,
-);
-
-export function isAvailableVegetableId(value: string): value is VegetableId {
-  return isVegetableId(value) && vegetables[value].available;
-}
+} as const;

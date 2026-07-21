@@ -12,7 +12,7 @@
 | 输出 | 静态导出（`output: 'export'`），无服务端 |
 | 样式 | 原生 CSS（`styles/globals.css`），支持浅色/深色 |
 | 托管 | GitHub Pages + GitHub Actions，自定义域名 |
-| 数据 | `data/*.ts`，没有数据库 |
+| 数据 | `data/vegetables/*.md` + `data/*.ts`，没有数据库 |
 
 ## 开发
 
@@ -21,7 +21,11 @@ npm install
 npm run dev        # http://localhost:3000
 npm run build      # 静态导出到 out/
 npm run typecheck  # tsc --noEmit
+npm run build:data # 把 data/vegetables/*.md 编译成 generated.ts
 ```
+
+> `dev` 和 `build` 会自动先跑 `build:data`。只有在 dev 已经起着的时候改了 `.md`，
+> 才需要手动跑一次 `npm run build:data`（或重启 dev）。
 
 > `npm run build` 会重建 `.next/`。dev 正在跑的时候执行会让 dev 报
 > `Cannot find module ./chunks/...`，先停 dev 再构建。
@@ -29,7 +33,10 @@ npm run typecheck  # tsc --noEmit
 ## 目录
 
 ```
-data/vegetables.ts   蔬菜数据（唯一的商品来源）
+data/vegetables/<id>.md    蔬菜数据，一个品种一个文件（唯一的商品来源）
+data/vegetables/generated.ts  由上面的 .md 生成，别手改
+data/vegetables/index.ts   类型与筛选逻辑，代码从这里 import
+scripts/build-vegetables.mjs  .md → generated.ts 的编译脚本
 data/farm.ts         菜地坐标与地图链接
 data/site.ts         站点地址、名称、OGP 图片
 components/SeoHead.tsx  标题与 OGP 标签
@@ -45,17 +52,35 @@ public/images/       蔬菜与料理图片
 
 ## 日常维护
 
+### 蔬菜数据长什么样
+
+每个品种一个 Markdown 文件，**文件名就是网址里的 id**（`data/vegetables/xiangcai.md`
+→ `/vegetables/xiangcai/`）。frontmatter 放结构化字段，正文就是介绍文字：
+
+```markdown
+---
+name: 香菜
+order: 1                              # 列表页的展示顺序
+price: 1200                           # 日元／公斤，整数
+available: true
+image: /images/vegetables/xiangcai.svg
+dishes:
+  - name: 凉拌香菜
+    image: /images/dishes/xiangcai-liangban.svg
+---
+
+香气独特的芫荽，叶片鲜嫩。适合出锅前撒入或凉拌，久煮会损失香味。
+```
+
+改完跑 `npm run build:data`，它会重新生成 `generated.ts`，**生成结果要一起提交**。
+CI 会检查两者是否一致，忘了生成会被拦下来。
+
+frontmatter 只支持上面这几种写法（标量 + 缩进列表），不是完整 YAML。
+字段拼错、类型不对、图片文件不存在、`order` 撞车，脚本都会指名报错，不会静默通过。
+
 ### 改价格
 
-`data/vegetables.ts` 里改 `price`。单位是**日元／公斤**，整数。
-
-```ts
-xiangcai: {
-  name: '香菜',
-  price: 1200,   // ¥1,200 / 1公斤
-  available: true,
-},
-```
+对应 `.md` 里改 `price`，然后 `npm run build:data`。单位是**日元／公斤**，整数。
 
 ### 过季下架
 
@@ -66,18 +91,21 @@ xiangcai: {
 
 ### 增加品种
 
-1. 在 `data/vegetables.ts` 里加一项，key 用拼音（会成为网址 `/vegetables/<key>/`）
+1. 新建 `data/vegetables/<key>.md`，`<key>` 用拼音（会成为网址 `/vegetables/<key>/`）
 2. 放图片到 `public/images/vegetables/<key>.svg` 和 `public/images/dishes/<key>-*.svg`
-3. `data` 里的 `image` 路径以 `/images/` 开头，不要写 basePath
+3. `image` 路径以 `/images/` 开头，不要写 basePath
+4. `order` 给一个没被占用的值，决定它排在列表第几位
+5. `npm run build:data`，把 `.md` 和 `generated.ts` 一起提交
 
-字段不全时 `npm run typecheck` 会报错，照着提示补。
+字段不全或图片路径写错时，`build:data` 会报错，照着提示补。
 
 ### 换图片
 
 现在 `public/images/` 下全是**占位图**（画着品名的 SVG），上线前需要换成真实照片。
 
-- 建议同名替换，然后把 `data/vegetables.ts` 里的扩展名从 `.svg` 改成 `.jpg`
-- 改品种名时，**图片文件名、`data` 里的路径、图片内容三者要一起改**，漏一个就会 404
+- 建议同名替换，然后把对应 `.md` 里的扩展名从 `.svg` 改成 `.jpg`
+- 改品种名时，**图片文件名、`.md` 里的路径、图片内容三者要一起改**，漏一个就会 404
+  （路径写错时 `build:data` 会直接报「图片不存在」，不用等到线上 404）
 - 用外部 CDN 的话，需要在 `next.config.ts` 配 `images.remotePatterns`
 
 ### 改菜地位置
